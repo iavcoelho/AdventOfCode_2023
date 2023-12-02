@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 fn main() {
     let input = include_str!("input.txt");
     let output = process(input);
@@ -7,9 +9,7 @@ fn main() {
 fn process(input: &str) -> String {
     let mut game_power: Vec<i32> = Vec::new();
     for line in input.lines() {
-        let mut max_g = 0;
-        let mut max_r = 0;
-        let mut max_b = 0;
+        let mut map = BTreeMap::from([("red", 0), ("green", 0), ("blue", 0)]);
         let data = line.split(":").collect::<Vec<_>>();
         let sub_games: Vec<_> = data[1]
             .split(";")
@@ -18,17 +18,10 @@ fn process(input: &str) -> String {
         for i in (0..sub_games.len()).step_by(2) {
             let size = sub_games.get(i).unwrap().parse::<i32>().unwrap();
             let color = sub_games.get(i + 1).unwrap();
-            if color.eq(&"green") && size > max_g {
-                max_g = size;
-            }
-            if color.eq(&"blue") && size > max_b {
-                max_b = size;
-            }
-            if color.eq(&"red") && size > max_r {
-                max_r = size;
-            }
+            map.entry(color)
+                .and_modify(|value| *value = (*value).max(size));
         }
-        game_power.push(max_r * max_g * max_b);
+        game_power.push(map.values().product());
     }
     game_power.iter().sum::<i32>().to_string()
 }
